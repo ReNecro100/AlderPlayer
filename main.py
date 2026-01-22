@@ -2,6 +2,7 @@ import pygame
 import os
 from random import choice, randint
 
+#Lol why does this file exist???
 def modulj(a):
     return (a*-1 if a<0 else a)
 
