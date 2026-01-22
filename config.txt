@@ -1,0 +1,4 @@
+CurrentAlderVinyl: Back In Black
+PathToAlderVinyls: D:\ALDERVINYLS
+Volume: 0.2
+IsSmallWindow: 1

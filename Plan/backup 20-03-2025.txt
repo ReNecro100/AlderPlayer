@@ -1,0 +1,253 @@
+import pygame
+import os
+
+pygame.init()
+pygame.mixer.init()
+pygame.font.init()
+
+screen = pygame.display.set_mode((500, 500))
+layerTop = pygame.Surface((500,500), pygame.SRCALPHA)
+pygame.display.set_caption("AlderPlayer 0.2")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("Arial", 36)
+icon_image = pygame.image.load('sprites/icon.png')
+pygame.display.set_icon(icon_image)
+
+play_button_image = pygame.image.load(f'sprites/play_button.png')
+pause_button_image = pygame.image.load(f'sprites/pause_button.png')
+flip_button_image = pygame.image.load(f'sprites/flip_button.png')
+volume_up_button_image = pygame.image.load(f'sprites/volume_up_button.png')
+volume_down_button_image = pygame.image.load(f'sprites/volume_down_button.png')
+stop_button_image = pygame.image.load(f'sprites/stop_button.png')
+loop_button_image = pygame.image.load(f'sprites/loop_button.png')
+looped_button_image = pygame.image.load(f'sprites/looped_button.png')
+left_button_image = pygame.image.load(f'sprites/left_button.png')
+right_button_image = pygame.image.load(f'sprites/right_button.png')
+add_button_image = pygame.image.load(f'sprites/add_button.png')
+
+vinyl_name='demo.ALDERVINYL'
+vinyl = [elem for elem in os.listdir('ALDERVINYLS\\' + vinyl_name) if elem[-4:] == '.png' or elem[-4:] == '.mp3']
+is_backside = False
+for i in vinyl:
+    if i[-4:]=='.png':
+        bgimage = i
+        vinyl.remove(i)
+        break
+try:
+    bg_image = pygame.image.load(f'ALDERVINYLS/{vinyl_name}/{bgimage}')
+except:
+    bg_image = pygame.image.load('sprites/default_cover.png')
+is_showing_list_of_vinyls = False
+press_them_to_play = []
+vinyl_to_show=vinyl[:5]
+for i in range(5):
+    music_button_rects_x_position = 500 - 55 * 2 - 60 * i
+    press_them_to_play.append(
+        [screen.blit(play_button_image, (450, music_button_rects_x_position)),
+         f'ALDERVINYLS\\{vinyl_name}\\' + vinyl_to_show[i], 0])
+
+volume = 0.4
+is_looped = False
+#vinyl_front = vinyl[:5]
+#vinyl_back = vinyl[5:]
+
+AlderPlayer = True
+while AlderPlayer:
+    #Bg
+    screen.blit(bg_image, (0, 0))
+
+    #Спавн UI
+    screen.blit(flip_button_image, (400, 10))
+    screen.blit(add_button_image, (450, 10))
+    name = font.render(vinyl_name.replace('.ALDERVINYL', ''), True, (0, 0, 0), (255,255,255))
+    screen.blit(name, (0, 0))
+
+    screen.blit(volume_up_button_image, (400, 450))
+    screen.blit(volume_down_button_image, (450, 450))
+
+    screen.blit(stop_button_image, (50, 450))
+    if is_looped:
+        screen.blit(looped_button_image, (100, 450))
+    else:
+        screen.blit(loop_button_image, (100, 450))
+    screen.blit(left_button_image, (0, 450))
+    screen.blit(right_button_image, (150, 450))
+
+    for i in range(5):
+        txtsurf = font.render(vinyl_to_show[i][:-4][:28]+'...'*(len(vinyl_to_show[i][:-4])>28), True, (0, 0, 0))
+        music_rects_x_position = 500 - 60 * 2 - 60 * i
+        if press_them_to_play[i][2]==0:
+            pygame.draw.rect(screen, (255, 255, 255), (0, music_rects_x_position, 500, 60))
+        else:
+            pygame.draw.rect(screen, (128, 166, 255), (0, music_rects_x_position, 500, 60))
+        pygame.draw.rect(screen, (0, 0, 0), (0, music_rects_x_position, 500, 60), 5)
+        music_button_rects_x_position = 500 - 55 * 2 - 60 * i
+        if press_them_to_play[i][2]>0:
+            screen.blit(pause_button_image, (450, music_button_rects_x_position))
+        else:
+            screen.blit(play_button_image, (450, music_button_rects_x_position))
+        screen.blit(txtsurf, (10, music_button_rects_x_position))
+    screen.blit(layerTop, (0, 0))
+
+    #Vazhnyje shtukoviny
+    if not pygame.mixer.music.get_busy():
+        for i in range(5):
+            music_button_rects_x_position = 500 - 55 * 2 - 60 * i
+            screen.blit(play_button_image, (450, music_button_rects_x_position))
+        try:
+            if is_looped and sum(j[2] for j in press_them_to_play)>=0:
+                pygame.mixer.music.queue([k[1] for k in press_them_to_play if k[2]!=0][0])
+                pygame.mixer.music.play()
+            elif sum(j[2] for j in press_them_to_play)>0:
+                pygame.mixer.music.stop()
+                pygame.mixer.music.unload()
+                if sum(j[2] for j in press_them_to_play)==1:
+                    press_them_to_play[0][2]=0
+                    press_them_to_play[4][2]=5
+                    pygame.mixer.music.load(press_them_to_play[0][1])
+                else:
+                    son_index = [k[2] for k in press_them_to_play if k[2] != 0][0] - 2
+                    pygame.mixer.music.load(press_them_to_play[son_index][1])
+                    for j in press_them_to_play:
+                        j[2] = 0
+                    press_them_to_play[son_index][2] = son_index + 1
+                pygame.mixer.music.play()
+                pygame.mixer.music.set_volume(volume)
+        except:
+            pass
+
+    #Meniu vybora vinilov
+    if is_showing_list_of_vinyls:
+        vinyls_choice = []
+        for q in range(len(os.listdir('ALDERVINYLS'))):
+            one_of_vinyls = font.render(os.listdir('ALDERVINYLS')[q].replace('.ALDERVINYL', ''), True, (0, 0, 0))
+            vinyls_choice.append((os.listdir('ALDERVINYLS')[q], pygame.draw.rect(screen, (255, 255, 255), (300, 10 + 50 * (q + 1), 200, 50))))
+            pygame.draw.rect(screen, (0, 0, 0), (300, 10 + 50 * (q + 1), 200, 50), 5)
+            screen.blit(one_of_vinyls, (310, 10 + 50 * (q + 1)))
+
+    for event in pygame.event.get():
+        if event.type==pygame.QUIT:
+            AlderPlayer=False
+        # kliki myshkoj
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                # flip aljdervinila
+                if 400 <= pygame.mouse.get_pos()[0] <= 440 and 10 <= pygame.mouse.get_pos()[1] <= 50:
+                    is_backside = not is_backside
+                    pygame.mixer.music.stop()
+                    if is_backside:
+                        vinyl_to_show = vinyl[5:]
+                    else:
+                        vinyl_to_show = vinyl[:5]
+                    press_them_to_play = []
+                    for i in range(5):
+                        music_button_rects_x_position = 500 - 55 * 2 - 60 * i
+                        press_them_to_play.append(
+                            [screen.blit(play_button_image, (450, music_button_rects_x_position)),
+                             f'ALDERVINYLS\\{vinyl_name}\\' + vinyl_to_show[i], 0])
+                # Zamena vinila
+                if 450 <= pygame.mouse.get_pos()[0] <= 490 and 10 <= pygame.mouse.get_pos()[1] <= 50:
+                    is_showing_list_of_vinyls = not is_showing_list_of_vinyls
+                # Izmenenije gromkosti
+                elif 400 <= pygame.mouse.get_pos()[0] <= 440 and 450 <= pygame.mouse.get_pos()[1] <= 490:
+                    volume += 0.1
+                    pygame.mixer.music.set_volume(volume)
+                elif 450 <= pygame.mouse.get_pos()[0] <= 490 and 450 <= pygame.mouse.get_pos()[1] <= 490:
+                    volume -= 0.1
+                    pygame.mixer.music.set_volume(volume)
+                # stop muziaki
+                elif 50 <= pygame.mouse.get_pos()[0] <= 90 and 450 <= pygame.mouse.get_pos()[1] <= 490:
+                    pygame.mixer.music.stop()
+                    for j in press_them_to_play:
+                        j[2] = 0
+                # Loop
+                elif 100 <= pygame.mouse.get_pos()[0] <= 140 and 450 <= pygame.mouse.get_pos()[1] <= 490:
+                    is_looped = not is_looped
+                # Vlevo i vpravo
+                elif 0 <= pygame.mouse.get_pos()[0] <= 40 and 450 <= pygame.mouse.get_pos()[1] <= 490:
+                    try:
+                        pygame.mixer.music.stop()
+                        pygame.mixer.music.unload()
+                        left_sond_index = [k[2] for k in press_them_to_play if k[2] != 0][0]
+                        pygame.mixer.music.load(press_them_to_play[left_sond_index][1])
+                        pygame.mixer.music.play()
+                        pygame.mixer.music.set_volume(volume)
+                        for j in press_them_to_play:
+                            j[2] = 0
+                        press_them_to_play[left_sond_index][2] = left_sond_index + 1
+                    except:
+                        pass
+                elif 150 <= pygame.mouse.get_pos()[0] <= 190 and 450 <= pygame.mouse.get_pos()[1] <= 490:
+                    try:
+                        pygame.mixer.music.stop()
+                        pygame.mixer.music.unload()
+                        right_sond_index = [k[2] for k in press_them_to_play if k[2] != 0][0] - 2
+                        pygame.mixer.music.load(press_them_to_play[right_sond_index][1])
+                        pygame.mixer.music.play()
+                        pygame.mixer.music.set_volume(volume)
+                        for j in press_them_to_play:
+                            j[2] = 0
+                        press_them_to_play[right_sond_index][2] = right_sond_index + 1
+                    except:
+                        pass
+                else:
+                    pass
+
+                # Vosproizvedenije muzyki
+                for i in press_them_to_play:
+                    if i[0][0] <= pygame.mouse.get_pos()[0] <= i[0][0] + i[0][2] and i[0][1] <= pygame.mouse.get_pos()[
+                        1] <= \
+                            i[0][1] + i[0][2]:
+                        if press_them_to_play[press_them_to_play.index(i)][2] <= 0:
+                            if pygame.mixer.music.get_pos() <= 1 or press_them_to_play[press_them_to_play.index(i)][
+                                2] != sum(j[2] for j in press_them_to_play):
+                                try:
+                                    pygame.mixer.music.unload()
+                                except:
+                                    pass
+                                pygame.mixer.music.load(press_them_to_play[press_them_to_play.index(i)][1])
+                                pygame.mixer.music.play()
+                                pygame.mixer.music.set_volume(volume)
+                            else:
+                                pygame.mixer.music.unpause()
+                            for j in press_them_to_play:
+                                j[2] = 0
+                            press_them_to_play[press_them_to_play.index(i)][2] = press_them_to_play.index(i) + 1
+                        else:
+                            press_them_to_play[press_them_to_play.index(i)][2] *= -1
+                            pygame.mixer.music.pause()
+
+                # smena vinila
+                if is_showing_list_of_vinyls:
+                    try:
+                        for i in vinyls_choice:
+                            if i[1].collidepoint(pygame.mouse.get_pos()):
+                                pygame.mixer.music.stop()
+                                vinyl_name = i[0]
+                                vinyl = [elem for elem in os.listdir('ALDERVINYLS\\' + vinyl_name) if
+                                         elem[-4:] == '.png' or elem[-4:] == '.mp3']
+                                is_backside = False
+                                for i in vinyl:
+                                    if i[-4:] == '.png':
+                                        bgimage = i
+                                        vinyl.remove(i)
+                                try:
+                                    bg_image = pygame.image.load(f'ALDERVINYLS/{vinyl_name}/{bgimage}')
+                                except:
+                                    bg_image = pygame.image.load('sprites/default_cover.png')
+                                press_them_to_play = []
+                                vinyl_to_show = vinyl[:5]
+                                for i in range(5):
+                                    music_button_rects_x_position = 500 - 55 * 2 - 60 * i
+                                    press_them_to_play.append(
+                                        [screen.blit(play_button_image, (450, music_button_rects_x_position)),
+                                         f'ALDERVINYLS\\{vinyl_name}\\' + vinyl_to_show[i], 0])
+                                is_showing_list_of_vinyls = False
+                    except:
+                        pass
+
+    #Cylk nuzhnyj kapec kakoj-to
+    pygame.display.flip()
+    #pygame.event.wait()
+    pygame.display.update()
+    clock.tick(50)
