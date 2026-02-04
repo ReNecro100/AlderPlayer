@@ -59,8 +59,8 @@ window_button_image = pygame.image.load(f'sprites/window_button.png')
 try:
     vinyl = [elem for elem in os.listdir(f'{path_to_aldervinyls}\\' + vinyl_name) if elem[-4:] == '.png' or elem[-4:] == '.mp3']
 except:
-    vinyl_name = 'demo.ALDERVINYL'
-    vinyl = [elem for elem in os.listdir(f'{path_to_aldervinyls}\\' + vinyl_name) if elem[-4:] == '.png' or elem[-4:] == '.mp3']
+    vinyl_name='demo'
+    vinyl = [elem for elem in os.listdir(f'.\demo.ALDERVINYL') if elem[-4:] == '.png' or elem[-4:] == '.mp3']
 vinyl.sort()
 
 is_backside = True

@@ -1,3 +1,4 @@
-CurrentAlderVinyl: Back In Black
+CurrentAlderVinyl: Afternoons In Utopia
 PathToAlderVinyls: D:\ALDERVINYLS
 Volume: 0.2
+IsSmallWindow: 1
