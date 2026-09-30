@@ -60,7 +60,7 @@ try:
     vinyl = [elem for elem in os.listdir(f'{path_to_aldervinyls}\\' + vinyl_name) if elem[-4:] == '.png' or elem[-4:] == '.mp3']
 except:
     vinyl_name='demo'
-    vinyl = [elem for elem in os.listdir(f'.\demo.ALDERVINYL') if elem[-4:] == '.png' or elem[-4:] == '.mp3']
+    vinyl = [elem for elem in os.listdir(f'demo.ALDERVINYL') if elem[-4:] == '.png' or elem[-4:] == '.mp3']
 vinyl.sort()
 
 is_backside = True
@@ -72,8 +72,8 @@ for i in vinyl:
 try:
     bg_image = pygame.image.load(f'{path_to_aldervinyls}/{vinyl_name}/{bgimage}')
 except:
-    print([el for el in os.listdir('sprites/') if el[:13]=='default_cover'])
-    bg_image = pygame.image.load('sprites/'+choice([el for el in os.listdir('sprites/') if el[:13]=='default_cover'])) #'sprites/default_cover.png'
+    print([el for el in os.listdir('sprites/') if el[:13] == 'default_cover'])
+    bg_image = pygame.image.load('sprites/' + choice([el for el in os.listdir('sprites/') if el[:13] == 'default_cover'])) #'sprites/default_cover.png'
 bg_image_on_vinyl = pygame.transform.scale(bg_image, [150,150])
 is_showing_list_of_vinyls = False
 current_playing = -1000
